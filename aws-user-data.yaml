@@ -44,6 +44,11 @@ write_files:
 
       chsh -s /usr/bin/zsh "${TARGET_USER}"
 
+      # Install Claude Code CLI before the zplug step below: zplug's
+      # non-interactive "zplug install --force" run hangs/loops, so anything
+      # placed after it never executes.
+      sudo -u "${TARGET_USER}" -H env HOME="${TARGET_HOME}" bash -c 'curl -fsSL https://claude.ai/install.sh | bash'
+
       if [ ! -d "${TARGET_HOME}/.zplug" ]; then
         sudo -u "${TARGET_USER}" -H git clone --depth 1 https://github.com/zplug/zplug "${TARGET_HOME}/.zplug"
       fi
@@ -61,9 +66,6 @@ write_files:
       '
 
       chown -R "${TARGET_USER}:${TARGET_USER}" "${TARGET_HOME}/.zplug" "${TARGET_HOME}/.zshrc" "${TARGET_HOME}/.p10k.zsh"
-
-      # Install Claude Code CLI (native installer, no Node.js required)
-      sudo -u "${TARGET_USER}" -H env HOME="${TARGET_HOME}" bash -c 'curl -fsSL https://claude.ai/install.sh | bash'
 
 runcmd:
   - [ bash, /root/setup-zsh.sh ]
